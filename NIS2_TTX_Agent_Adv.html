@@ -44,10 +44,11 @@
         <button id="next-phase-button" onclick="handleLogInput()">Inizia TTX: FASE 1</button>
     </div>
     
-    <div id="ttx-summary" style="display:none;">
-        <h2>Esercizio Concluso</h2>
-        <p>Il TTX è terminato. Tutti i dati sono stati inviati al Google Sheet. Procedere con il Debriefing e la documentazione delle Lessons Learned.</p>
-    </div>
+</div>
+    
+<div id="ttx-summary" style="display:none;">
+    <h2>Esercizio Concluso</h2>
+    <p>Il TTX è terminato. Tutti i dati sono stati inviati al Google Sheet. Procedere con il Debriefing e la documentazione delle Lessons Learned.</p>
 </div>
 
 <script>
@@ -229,22 +230,44 @@
         });
     }
 
+// Aggiunta la funzione endTTX separatamente per una gestione più pulita
+function endTTX() {
+    const ttxSummaryDiv = document.getElementById('ttx-summary');
+    const ttxAppDiv = document.getElementById('ttx-app');
+
+    // 1. Nascondi il contenitore principale del TTX
+    ttxAppDiv.style.display = 'none';
+
+    // 2. Mostra il riepilogo finale con il messaggio di successo
+    ttxSummaryDiv.style.display = 'block';
+    ttxSummaryDiv.innerHTML = `
+        <h2>✅ Test Completato!</h2>
+        <p><strong>Riepilogo:</strong> L'Esercizio TTX è terminato.</p>
+        <p>Tutte le azioni sono state registrate e inviate al Google Sheet tramite lo script serverless.</p>
+        <p>Procedi ora con il Debriefing (Post-Incident Review) e la documentazione delle Lessons Learned con il team.</p>
+    `;
+    
+    // Messaggio di conferma in console
+    console.log("TTX completato. Fine dell'esercizio. Verifica il Google Sheet."); 
+}
+
 function processNextAction() {
     
     const totalActionsInCurrentPhase = ttxPhases[currentPhaseIndex].actions.length;
     const totalPhases = ttxPhases.length;
 
-    // A. Check if the current action is the LAST action of the LAST phase
+    // Check if the current action is the LAST action of the LAST phase
+    // L'indice dell'azione è 0-based. Se è l'ultima azione (indice = totale - 1), allora avanza.
     if (currentPhaseIndex === totalPhases - 1 && currentActionIndex === totalActionsInCurrentPhase - 1) {
         // Ultima azione dell'ultima fase completata.
         endTTX();
-        return; // Termina qui l'esecuzione
+        return; 
     }
 
-    // B. Avanza all'azione successiva (nella stessa fase)
+    // Avanza all'azione successiva (nella stessa fase)
     currentActionIndex++;
     
-    // C. Controlla se le azioni nella fase corrente sono finite (se B non è soddisfatto)
+    // Controlla se le azioni nella fase corrente sono finite
     if (currentActionIndex >= totalActionsInCurrentPhase) {
         // Se le azioni sono finite, passa alla fase successiva
         currentPhaseIndex++;
@@ -256,28 +279,8 @@ function processNextAction() {
         }
     }
     
-    // D. Rendi la fase o azione successiva
+    // Rendi la fase o azione successiva
     renderPhase();
-}
-    
-function endTTX() {
-    const ttxSummaryDiv = document.getElementById('ttx-summary');
-    const ttxAppDiv = document.getElementById('ttx-app');
-
-    // Assicurati che il contenitore principale sparisca
-    ttxAppDiv.style.display = 'none';
-
-    // Mostra il riepilogo finale
-    ttxSummaryDiv.style.display = 'block';
-    ttxSummaryDiv.innerHTML = `
-        <h2>✅ Test Completato!</h2>
-        <p><strong>Riepilogo:</strong> L'Esercizio TTX è terminato.</p>
-        <p>Tutte le azioni sono state registrate e inviate al Google Sheet tramite lo script serverless.</p>
-        <p>Procedi ora con il Debriefing (Post-Incident Review) e la documentazione delle Lessons Learned con il team.</p>
-    `;
-    
-    // Mostra anche la console per feedback visivo, se l'utente la sta guardando
-    console.log("TTX completato. Fine dell'esercizio."); 
 }
 </script>
 
