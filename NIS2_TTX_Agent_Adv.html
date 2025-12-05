@@ -1,0 +1,236 @@
+<body>
+<div id="ttx-app">
+    <h1>NIS2 Table Top Exercise (TTX)</h1>
+    <p>Facilitatore: Segui le istruzioni dell'Agente e registra tutte le risposte dei partecipanti nel Log Condiviso.</p>
+
+    <div id="ttx-scenario">
+        </div>
+    
+    <div id="facilitator-instructions">
+        <h2>👉 Istruzioni per il Facilitatore (TUE Azioni)</h2>
+        <p id="facilitator-text"></p>
+        
+        <div id="log-entry">
+            <h3>📝 Log di Registrazione</h3>
+            <p><strong>Registra nel Log Condiviso (Chat/Mail):</strong> La risposta data dal partecipante, il momento e il ruolo. Clicca su "Azione Registrata" solo dopo aver confermato l'azione del partecipante.</p>
+        </div>
+        
+        <button id="next-phase-button" onclick="nextPhase()" disabled>Azione Registrata. Continua.</button>
+    </div>
+    
+    <div id="ttx-summary" style="display:none;">
+        <h2>Esercizio Concluso</h2>
+        <p>Il TTX è terminato. Procedere con il Debriefing e la documentazione delle Lessons Learned.</p>
+    </div>
+</div>
+<style>
+<head>
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e9ecef; margin: 20px; }
+#ttx-app { max-width: 900px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+h1 { color: #004d99; border-bottom: 3px solid #004d99; padding-bottom: 10px; text-align: center; }
+h2 { color: #e95420; margin-top: 25px; }
+h3 { color: #333; margin-top: 15px; }
+#ttx-scenario { background-color: #f8f9fa; border: 1px solid #ced4da; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+#facilitator-instructions { background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 20px; border-radius: 8px; margin-top: 20px; }
+<div id="log-entry">
+    <h3>📝 Registrazione Risposta</h3>
+    <p><strong>Registra nel Log Condiviso (Chat/Mail):</strong> La risposta data dal partecipante, il momento e il ruolo.</p>
+    <textarea id="facilitator-response-input" rows="3" placeholder="Digita qui la risposta completa del partecipante (es. 'L'IC ha risposto: Approvo l'isolamento dell'host X alle 10:05')."></textarea>
+</div>
+
+<button id="next-phase-button" onclick="handleLogInput()" disabled>Azione Registrata. Continua.</button>
+button { background-color: #28a745; color: white; border: none; padding: 12px 25px; margin-top: 20px; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s; width: 100%; }
+button:disabled { background-color: #6c757d; cursor: not-allowed; }
+.critical-action { font-weight: bold; color: #dc3545; }
+</head>
+</style>
+<script>
+const ROLES = {
+    IM_IC: "CIO (Incident Manager / Coordinator)",
+    DPO: "DPO",
+    SA_IRT: "System Administrator (Gruppo Operativo)",
+    CSIRT_REF: "Gestore TTX (Referente CSIRT)",
+    CEO_SEC: "Segretaria CEO (Comunicazione Direzione)"
+};
+
+const ttxPhases = [
+    // --- FASE 1: Rilevamento e Triage (T + 30 minuti) ---
+    {
+        title: "FASE 1: Rilevamento e Triage (T = 10:00:00)",
+        scenario: "Mercoledì alle 10:00, il **System Administrator** riceve un avviso critico da un fornitore di servizi cloud: Credenziali amministrative compromesse e uso del dominio per una massiva campagna di phishing, causando interruzione del servizio. L'evento è un Incidente Significativo.",
+        actions: [
+            {
+                role: ROLES.IM_IC,
+                question: "Quali sono le tue prime due azioni in qualità di Incident Coordinator per eseguire il Triage e la Dichiarazione dell'incidente Significativo? (Riferimento: Procedura 2.1)",
+                logInstruction: "Registra le prime due azioni dichiarate dal CIO (IC) e l'ora. Tempo massimo per la risposta: 5 minuti."
+            },
+            {
+                role: ROLES.CEO_SEC,
+                question: "L'IM (CIO) deve informare la Direzione Generale. Cosa deve comunicare l'IM e, soprattutto, quale canale di comunicazione (out of band) deve essere utilizzato? (Tempo Obiettivo: Entro 10:30:00)",
+                logInstruction: "Registra il canale e il contenuto della comunicazione alla Direzione (Segretaria CEO)."
+            }
+        ]
+    },
+    // --- FASE 2: Contenimento e Pre-Notifica (T + 24 ore) ---
+    {
+        title: "FASE 2: Contenimento e Notifica Critica (Scadenza: 10:00:00 del giorno dopo)",
+        scenario: "Sono passate 2 ore da T. Il Contenimento deve essere eseguito rapidamente. Il CIO (IM) deve approvare le azioni.",
+        actions: [
+            {
+                role: ROLES.SA_IRT,
+                question: "Quali sono le misure immediate di Contenimento che proponi per l'ambiente di posta (Exchange) e per la rete per limitare la diffusione del danno e preservare le prove?",
+                logInstruction: "Registra le azioni di Contenimento proposte dal System Admin (IRT) e l'approvazione/rifiuto del CIO (IM)."
+            },
+            {
+                role: ROLES.CSIRT_REF,
+                question: "<span class='critical-action'>AZIONE CRITICA NIS2:</span> Cosa deve essere preparato e inviato Entro 24 ore da T? Quali tre informazioni (almeno) deve includere questa comunicazione (Early Warning)?",
+                logInstruction: "Registra le tre informazioni chiave che il Gestore TTX (Referente CSIRT) invierà al CSIRT Italia per l'Early Warning."
+            }
+        ]
+    },
+    // --- FASE 3: Data Breach Check & Notifica Completa (T + 72 ore) ---
+    {
+        title: "FASE 3: Data Breach Check & Notifica Completa (Scadenza: 10:00:00 - 3 giorni dopo)",
+        scenario: "Durante l'analisi, il System Administrator scopre che le credenziali compromesse davano accesso anche a un database con PII (nomi e indirizzi email) di 500 clienti.",
+        actions: [
+            {
+                role: ROLES.DPO,
+                question: "Valutazione: Si tratta di un Data Breach con rischio? Qual è la tua azione obbligatoria, e verso quale autorità? (Riferimento: GDPR)",
+                logInstruction: "Registra l'analisi del DPO sull'obbligo di notifica e l'autorità destinataria (Garante Privacy)."
+            },
+            {
+                role: ROLES.CSIRT_REF,
+                question: "La scadenza di 72 ore si avvicina. Qual è lo scopo della **Incident Notification (Completa)** e quali sono i due nuovi dettagli che devi fornire rispetto alla Pre-Notifica?",
+                logInstruction: "Registra lo scopo e i due nuovi dettagli (Valutazione dettagliata e Causa Probabile) per la Notifica Completa."
+            }
+        ]
+    },
+    // --- FASE 4: Chiusura e Lessons Learned (T + 1 Mese) ---
+    {
+        title: "FASE 4: Eradication, Recovery e Chiusura",
+        scenario: "L'Eradication (rimozione delle backdoor, cambio password) e il Recovery sono stati eseguiti. L'IC chiude l'incidente.",
+        actions: [
+            {
+                role: ROLES.IM_IC,
+                question: "In qualità di Incident Manager, quali due passaggi sono fondamentali per la fase Post-Incident prima della chiusura definitiva, e qual è il loro scopo? (Riferimento: Procedura 3.1)",
+                logInstruction: "Registra i due passaggi: PIR (Post-Incident Review) e Lessons Learned."
+            },
+            {
+                role: ROLES.CSIRT_REF,
+                question: "Qual è la scadenza finale per la notifica, e quale documento deve essere sottomesso al CSIRT per concludere formalmente l'incidente?",
+                logInstruction: "Registra la scadenza (1 Mese) e il documento finale (Relazione Finale) sottomesso al CSIRT."
+            }
+        ]
+    }
+];
+
+let currentPhaseIndex = 0;
+let currentActionIndex = 0;
+
+window.onload = function() {
+    document.getElementById('next-phase-button').disabled = false; // Abilita il pulsante di inizio
+    document.getElementById('next-phase-button').textContent = "Inizia TTX: FASE 1";
+    renderPhase();
+};
+
+// VARIABILE CRITICA: DEVI INSERIRE QUI L'URL DEL TUO DEPLOYMENT DI GOOGLE APPS SCRIPT (vedi sezione 2)
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/viavirtuosa.it/s/AKfycbz6EoCGTu8_S9tcMGds3etKhxJCOm7sX2eGZF63v7iWgrrB_gGrqKRVWelLlF3VACL7yw/exec'; 
+
+let currentPhaseIndex = 0;
+let currentActionIndex = 0;
+let currentLogData = {}; // Memorizza i dati da inviare
+
+// ... (window.onload e le definizioni dei ruoli ROLES RESTANO INVARIATE) ...
+
+function renderPhase() {
+    // ... (Il resto della funzione renderPhase resta invariato per l'aggiornamento UI) ...
+    
+    // 4. Reset Button e Log Data
+    const action = ttxPhases[currentPhaseIndex].actions[currentActionIndex];
+    const nextButton = document.getElementById('next-phase-button');
+
+    nextButton.textContent = `Registra e Continua (${currentActionIndex + 1}/${ttxPhases[currentPhaseIndex].actions.length})`;
+    nextButton.disabled = false; 
+
+    // Prepara i dati di logging per l'azione corrente
+    currentLogData = {
+        phase_id: ttxPhases[currentPhaseIndex].title,
+        role: action.role,
+        question: action.question,
+        // La risposta verrà aggiunta in handleLogInput()
+    };
+}
+
+// Funzione Aggiunta: Gestisce l'input del facilitatore e abilita l'invio
+function handleLogInput() {
+    const responseInput = document.getElementById('facilitator-response-input').value;
+    
+    if (responseInput.trim() === '') {
+        alert("Inserisci la risposta registrata prima di procedere.");
+        return;
+    }
+    
+    // Aggiorna i dati con la risposta del facilitatore
+    currentLogData.response_recorded = responseInput;
+    
+    // Invia il dato al Google Sheet in background
+    sendToGoogleSheet(currentLogData);
+
+    // Procedi alla fase successiva o alla prossima azione
+    processNextAction();
+}
+
+// Funzione Aggiunta: Invia i dati al Google Sheet tramite la funzione Serverless
+function sendToGoogleSheet(data) {
+    if (GOOGLE_SCRIPT_URL === 'INSERISCI_QUI_IL_TUO_URL_APPS_SCRIPT') {
+        console.error("ERRORE: Devi configurare l'URL di Google Apps Script prima di inviare i dati.");
+        alert("ERRORE: Configura l'URL di Google Apps Script.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('Timestamp', new Date().toISOString());
+    formData.append('Fase_ID', data.phase_id);
+    formData.append('Ruolo_Coinvolto', data.role);
+    formData.append('Domanda', data.question.replace(/<[^>]*>?/gm, '')); // Rimuove HTML
+    formData.append('Risposta_Registrata', data.response_recorded);
+    
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors' // Necessario quando si invia a un servizio cross-domain come Google Apps Script
+    })
+    .then(response => {
+        console.log('Dati inviati con successo al Google Sheet.', response);
+    })
+    .catch(error => {
+        console.error('Errore durante l\'invio dei dati:', error);
+    });
+}
+
+function processNextAction() {
+    currentActionIndex++;
+    
+    // 1. Reset input
+    document.getElementById('facilitator-response-input').value = '';
+
+    // 2. Controllo e passaggio alla fase successiva
+    if (currentActionIndex < ttxPhases[currentPhaseIndex].actions.length) {
+        renderPhase(); // Prossima azione nella stessa fase
+    } else {
+        currentPhaseIndex++; // Passa alla fase successiva
+        currentActionIndex = 0;
+        
+        if (currentPhaseIndex < ttxPhases.length) {
+            document.getElementById('next-phase-button').textContent = `Passa alla FASE ${currentPhaseIndex + 1}`;
+            renderPhase();
+        } else {
+            // Fine TTX
+            document.getElementById('ttx-app').style.display = 'none';
+            document.getElementById('ttx-summary').style.display = 'block';
+        }
+    }
+}
+
+</script>
+</body>
