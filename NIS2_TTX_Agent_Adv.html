@@ -229,35 +229,38 @@
         });
     }
 
-    function processNextAction() {
-        // Incrementa l'indice dell'azione per muoversi alla successiva
-        currentActionIndex++;
-        
-        const totalActionsInCurrentPhase = ttxPhases[currentPhaseIndex].actions.length;
-        const totalPhases = ttxPhases.length;
+function processNextAction() {
+    
+    const totalActionsInCurrentPhase = ttxPhases[currentPhaseIndex].actions.length;
+    const totalPhases = ttxPhases.length;
 
-        // 1. Controlla se ci sono ancora azioni nella FASE ATTUALE
-        if (currentActionIndex < totalActionsInCurrentPhase) {
-            // Se ci sono ancora azioni, semplicemente rendi la prossima azione
-            renderPhase(); 
-        } else {
-            // Se non ci sono più azioni in questa fase, vai alla prossima fase
-            currentPhaseIndex++;
-            currentActionIndex = 0; // Resetta l'indice dell'azione
-            
-            // 2. Controlla se la nuova fase rientra nel totale delle fasi
-            if (currentPhaseIndex < totalPhases) {
-                // C'è ancora una nuova fase: aggiorna il bottone e rendi la nuova fase
-                document.getElementById('next-phase-button').textContent = `Passa alla FASE ${currentPhaseIndex + 1}`;
-                renderPhase();
-            } else {
-                // TUTTE le fasi sono state completate.
-                endTTX();
-            }
+    // A. Check if the current action is the LAST action of the LAST phase
+    if (currentPhaseIndex === totalPhases - 1 && currentActionIndex === totalActionsInCurrentPhase - 1) {
+        // Ultima azione dell'ultima fase completata.
+        endTTX();
+        return; // Termina qui l'esecuzione
+    }
+
+    // B. Avanza all'azione successiva (nella stessa fase)
+    currentActionIndex++;
+    
+    // C. Controlla se le azioni nella fase corrente sono finite (se B non è soddisfatto)
+    if (currentActionIndex >= totalActionsInCurrentPhase) {
+        // Se le azioni sono finite, passa alla fase successiva
+        currentPhaseIndex++;
+        currentActionIndex = 0; // Resetta l'indice dell'azione
+        
+        // Aggiorna il testo del pulsante
+        if (currentPhaseIndex < totalPhases) {
+            document.getElementById('next-phase-button').textContent = `Passa alla FASE ${currentPhaseIndex + 1}`;
         }
     }
     
-    function endTTX() {
+    // D. Rendi la fase o azione successiva
+    renderPhase();
+}
+    
+function endTTX() {
     const ttxSummaryDiv = document.getElementById('ttx-summary');
     const ttxAppDiv = document.getElementById('ttx-app');
 
@@ -272,6 +275,9 @@
         <p>Tutte le azioni sono state registrate e inviate al Google Sheet tramite lo script serverless.</p>
         <p>Procedi ora con il Debriefing (Post-Incident Review) e la documentazione delle Lessons Learned con il team.</p>
     `;
+    
+    // Mostra anche la console per feedback visivo, se l'utente la sta guardando
+    console.log("TTX completato. Fine dell'esercizio."); 
 }
 </script>
 
