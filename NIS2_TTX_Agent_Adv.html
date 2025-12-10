@@ -21,6 +21,8 @@
         button:disabled { background-color: #6c757d; cursor: not-allowed; }
         .critical-action { font-weight: bold; color: #dc3545; }
         .target-response { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; border-radius: 5px; margin-top: 10px; }
+        .mock-choice { margin-top: 10px; padding: 10px; border: 1px solid #004d99; background-color: #e7f5ff; border-radius: 5px; }
+        .mock-choice h4 { margin-top: 0; color: #004d99; }
     </style>
 </head>
 <body>
@@ -57,7 +59,6 @@
 
 <script>
     // VARIABILE CRITICA: URL DELLO SCRIPT APPS FORNITO DALL'UTENTE
-    // Sostituire con l'URL effettivo se si desidera l'invio dati. Qui è mantenuto quello di esempio.
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOz8qku8IGfLABEjzeLo9Wg-4k2P-Z2wM3A-WlZqztwRbiwC1wnz7DFqw6RQofma-roA/exec'; 
 
     const ROLES = {
@@ -77,16 +78,26 @@
                 {
                     role: ROLES.IM_IC,
                     question: "Quali sono le tue prime due azioni in qualità di Incident Coordinator per eseguire il Triage e la Dichiarazione dell'incidente Significativo? (Riferimento: Procedura 2.1)",
-                    facilitatorAction: "Invia al CIO l'alert iniziale: 'Avviso di Incidente Critico dal Fornitore (T=10:00:00). Credenziali amministrative compromesse, massiva campagna di phishing in corso, interruzione del servizio critico. Incidente Significativo NIS2.' Poi poni la domanda.",
-                    logInstruction: "Registra le prime due azioni dichiarate dal CIO (IC) e l'ora. Tempo massimo per la risposta: 5 minuti.",
-                    targetResponse: "Dichiarare formalmente l'incidente (DE.AE-08) e attivare il team di Risposta (IRT) (RS.MA-01) secondo il piano."
+                    facilitatorAction: "Invia al CIO l'alert iniziale: 'Avviso di Incidente Critico dal Fornitore (T=10:00:00). Credenziali amministrative compromesse, massiva campagna di phishing in corso, interruzione del servizio critico. Incidente Significativo NIS2.' **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra la risposta scelta dal CIO (IC) e l'ora. Tempo massimo per la risposta: 5 minuti.",
+                    targetResponse: "Dichiarare formalmente l'incidente (DE.AE-08) e attivare il team di Risposta (IRT) (RS.MA-01) secondo il piano.",
+                    mockChoices: [
+                        "Dichiarare formalmente l'incidente (DE.AE-08) e attivare il team di Risposta (IRT) (RS.MA-01) secondo il piano.",
+                        "Isolare immediatamente l'host compromesso senza informare la direzione, per evitare il panico.",
+                        "Chiamare subito il CSIRT Italia per la notifica, prima di analizzare la gravità."
+                    ]
                 },
                 {
                     role: ROLES.CEO_SEC,
                     question: "L'IM (CIO) deve informare la Direzione Generale. Cosa deve comunicare l'IM e, soprattutto, quale canale di comunicazione (out of band) deve essere utilizzato? (Tempo Obiettivo: Entro 10:30:00)",
-                    facilitatorAction: "Chiedi alla Segretaria CEO (simulando il CIO) cosa e come comunicare alla Direzione Generale, enfatizzando l'uso di canali di comunicazione alternativi (out of band).",
-                    logInstruction: "Registra il canale e il contenuto della comunicazione alla Direzione (Segretaria CEO).",
-                    targetResponse: "Canale Out of Band (e.g., telefono/SMS/app cifrata), comunicando brevemente la natura, la gravità dell'impatto e la richiesta di una call urgente (RS.CO-02)."
+                    facilitatorAction: "Chiedi alla Segretaria CEO (simulando il CIO) cosa e come comunicare alla Direzione Generale, enfatizzando l'uso di canali di comunicazione alternativi (out of band). **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra il canale e il contenuto della comunicazione scelta per la Direzione (Segretaria CEO).",
+                    targetResponse: "Canale Out of Band (e.g., telefono/SMS/app cifrata), comunicando brevemente la natura, la gravità dell'impatto e la richiesta di una call urgente (RS.CO-02).",
+                    mockChoices: [
+                        "Inviare una email aziendale (per tracciare la comunicazione) contenente un report tecnico completo e dettagliato.",
+                        "Canale Out of Band (e.g., telefono/SMS/app cifrata), comunicando brevemente la natura, la gravità dell'impatto e la richiesta di una call urgente (RS.CO-02).",
+                        "Non comunicare nulla fino a quando non si ha la certezza della causa radice (Root Cause) per non creare confusione."
+                    ]
                 }
             ]
         },
@@ -98,16 +109,26 @@
                 {
                     role: ROLES.SA_IRT,
                     question: "Quali sono le misure immediate di Contenimento che proponi per l'ambiente di posta (Exchange) e per la rete per limitare la diffusione del danno e preservare le prove?",
-                    facilitatorAction: "Simula l'approvazione del CIO per la Fase di Contenimento e poni la domanda al System Administrator, richiedendo azioni immediate e l'approccio alla conservazione delle prove.",
-                    logInstruction: "Registra le azioni di Contenimento proposte dal System Admin (IRT) e l'approvazione/rifiuto del CIO (IM).",
-                    targetResponse: "Isolare l'host compromesso e bloccare il traffico SMTP in uscita (RS.MI-01) per fermare il phishing. Acquisire l'immagine forense dell'host e dei log critici (RS.AN-07)."
+                    facilitatorAction: "Simula l'approvazione del CIO per la Fase di Contenimento e poni la domanda al System Administrator. **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra le azioni di Contenimento scelte dal System Admin (IRT).",
+                    targetResponse: "Isolare l'host compromesso e bloccare il traffico SMTP in uscita (RS.MI-01) per fermare il phishing. Acquisire l'immagine forense dell'host e dei log critici (RS.AN-07).",
+                    mockChoices: [
+                        "Disattivare immediatamente tutti gli account utente e server e attendere istruzioni da un consulente esterno.",
+                        "Isolare l'host compromesso e bloccare il traffico SMTP in uscita (RS.MI-01) per fermare il phishing. Acquisire l'immagine forense dell'host e dei log critici (RS.AN-07).",
+                        "Eseguire un riavvio del server Exchange per interrompere l'esecuzione del codice malevolo e poi ripristinare il servizio."
+                    ]
                 },
                 {
                     role: ROLES.CSIRT_REF,
                     question: "<span class='critical-action'>AZIONE CRITICA NIS2:</span> Cosa deve essere preparato e inviato Entro 24 ore da T? Quali tre informazioni (almeno) deve includere questa comunicazione (Early Warning)?",
-                    facilitatorAction: "Ricorda al Referente CSIRT la scadenza improrogabile di 24 ore per la *Early Warning* come previsto dall'Art. 25 del Decreto NIS.",
-                    logInstruction: "Registra le tre informazioni chiave che il Gestore TTX (Referente CSIRT) invierà al CSIRT Italia per l'Early Warning.",
-                    targetResponse: "Inviare la *Pre-notifica* o *Early Warning* al CSIRT Italia (Art. 25). Deve includere: 1. Riferimento/ID (BC:IM_SY/DX), 2. Valutazione preliminare di gravità (BC:SE_HI), 3. Tipo di minaccia (TT:MA/FR)."
+                    facilitatorAction: "Ricorda al Referente CSIRT la scadenza improrogabile di 24 ore per la *Early Warning* come previsto dall'Art. 25 del Decreto NIS. **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra la scelta per la Early Warning.",
+                    targetResponse: "Inviare la *Pre-notifica* o *Early Warning* al CSIRT Italia (Art. 25). Deve includere: 1. Riferimento/ID (BC:IM_SY/DX), 2. Valutazione preliminare di gravità (BC:SE_HI), 3. Tipo di minaccia (TT:MA/FR).",
+                    mockChoices: [
+                        "Inviare la *Pre-notifica* o *Early Warning* al CSIRT Italia (Art. 25). Deve includere: 1. Riferimento/ID (BC:IM_SY/DX), 2. Valutazione preliminare di gravità (BC:SE_HI), 3. Tipo di minaccia (TT:MA/FR).",
+                        "Inviare una notifica completa all'ACN con l'elenco di tutti gli utenti impattati, dato che mancano solo 24 ore.",
+                        "Aspettare l'analisi forense per avere la Causa Radice (Root Cause) certa prima di comunicare, anche se supera le 24 ore."
+                    ]
                 }
             ]
         },
@@ -119,16 +140,26 @@
                 {
                     role: ROLES.DPO,
                     question: "Valutazione: Si tratta di un Data Breach con rischio? Qual è la tua azione obbligatoria, e verso quale autorità? (Riferimento: GDPR)",
-                    facilitatorAction: "Simula la scoperta del SA: 'Alert: L'analisi conferma l'accesso di terzi non autorizzati a un DB contenente 500 PII (nomi/email) di clienti.' Poi poni la domanda al DPO.",
-                    logInstruction: "Registra l'analisi del DPO sull'obbligo di notifica e l'autorità destinataria (Garante Privacy).",
-                    targetResponse: "Sì, è un Data Breach con probabile rischio (BC:IM_DE). Azione obbligatoria: Notifica al Garante Privacy (RS.CO-06) entro 72 ore (GDPR Art. 33)."
+                    facilitatorAction: "Simula la scoperta del SA: 'Alert: L'analisi conferma l'accesso di terzi non autorizzati a un DB contenente 500 PII (nomi/email) di clienti.' Poni la domanda al DPO. **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra l'analisi del DPO sulla notifica GDPR e l'autorità destinataria.",
+                    targetResponse: "Sì, è un Data Breach con probabile rischio (BC:IM_DE). Azione obbligatoria: Notifica al Garante Privacy (RS.CO-06) entro 72 ore (GDPR Art. 33).",
+                    mockChoices: [
+                        "Sì, è un Data Breach con probabile rischio (BC:IM_DE). Azione obbligatoria: Notifica al Garante Privacy (RS.CO-06) entro 72 ore (GDPR Art. 33).",
+                        "No, non è un rischio, in quanto i dati sono solo PII base (nomi/email). Non è necessaria alcuna notifica formale.",
+                        "Sì, è un rischio. Azione obbligatoria: Notifica al CSIRT Italia (NIS2) e al Garante Privacy (GDPR), ma solo entro 1 mese."
+                    ]
                 },
                 {
                     role: ROLES.CSIRT_REF,
                     question: "La scadenza di 72 ore si avvicina. Qual è lo scopo della **Incident Notification (Completa)** e quali sono i due nuovi dettagli che devi fornire rispetto alla Pre-Notifica?",
-                    facilitatorAction: "Poni la domanda al Referente CSIRT, sottolineando che mancano poche ore alla scadenza per la Notifica Completa.",
-                    logInstruction: "Registra lo scopo e i due nuovi dettagli (Valutazione dettagliata e Causa Probabile) per la Notifica Completa.",
-                    targetResponse: "Scopo: Fornire un quadro iniziale completo. Due nuovi dettagli: 1. Valutazione dettagliata dell'incidente e del suo impatto (DE.AE-04). 2. Causa Probabile/Tipo di Minaccia (BC:RO / TT) riscontrata (DE.AE-07)."
+                    facilitatorAction: "Poni la domanda al Referente CSIRT, sottolineando che mancano poche ore alla scadenza per la Notifica Completa. **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra la risposta sullo scopo e i due nuovi dettagli (Valutazione dettagliata e Causa Probabile) per la Notifica Completa.",
+                    targetResponse: "Scopo: Fornire un quadro iniziale completo. Due nuovi dettagli: 1. Valutazione dettagliata dell'incidente e del suo impatto (DE.AE-04). 2. Causa Probabile/Tipo di Minaccia (BC:RO / TT) riscontrata (DE.AE-07).",
+                    mockChoices: [
+                        "Scopo: Fornire un quadro iniziale completo. Due nuovi dettagli: 1. Valutazione dettagliata dell'incidente e del suo impatto (DE.AE-04). 2. Causa Probabile/Tipo di Minaccia (BC:RO / TT) riscontrata (DE.AE-07).",
+                        "Scopo: Richiedere assistenza formale al CSIRT. Due nuovi dettagli: 1. L'elenco completo dei backup ripristinati. 2. Il nome del consulente legale che gestisce il caso.",
+                        "Scopo: Comunicare la chiusura dell'incidente. Due nuovi dettagli: 1. L'avvenuto ripristino di tutti i servizi. 2. La notifica formale agli utenti finali."
+                    ]
                 }
             ]
         },
@@ -140,16 +171,26 @@
                 {
                     role: ROLES.IM_IC,
                     question: "In qualità di Incident Manager, quali due passaggi sono fondamentali per la fase Post-Incident prima della chiusura definitiva, e qual è il loro scopo? (Riferimento: Procedura 3.1)",
-                    facilitatorAction: "Simula la chiusura delle attività tecniche: 'Eradication e Recovery completati con successo. L'incidente è sotto controllo.' Poi poni la domanda all'Incident Manager.",
-                    logInstruction: "Registra i due passaggi: PIR (Post-Incident Review) e Lessons Learned.",
-                    targetResponse: "1. Post-Incident Review (PIR) e 2. Lessons Learned (ID.IM-01/02). Scopo: Identificare miglioramenti e aggiornare policy/procedure."
+                    facilitatorAction: "Simula la chiusura delle attività tecniche: 'Eradication e Recovery completati con successo. L'incidente è sotto controllo.' Poni la domanda all'Incident Manager. **Leggi le 3 opzioni al partecipante.**",
+                    logInstruction: "Registra i due passaggi scelti: PIR (Post-Incident Review) e Lessons Learned.",
+                    targetResponse: "1. Post-Incident Review (PIR) e 2. Lessons Learned (ID.IM-01/02). Scopo: Identificare miglioramenti e aggiornare policy/procedure.",
+                    mockChoices: [
+                        "Eseguire un Audit Esterno (valutazione della conformità) e riavviare tutti i servizi IT.",
+                        "Archiviare tutti i log forensi su nastro (tape) e notificare il successo del ripristino agli stakeholder interni.",
+                        "1. Post-Incident Review (PIR) e 2. Lessons Learned (ID.IM-01/02). Scopo: Identificare miglioramenti e aggiornare policy/procedure."
+                    ]
                 },
                 {
                     role: ROLES.CSIRT_REF,
                     question: "Qual è la scadenza finale per la notifica, e quale documento deve essere sottomesso al CSIRT per concludere formalmente l'incidente?",
-                    facilitatorAction: "Chiedi al Referente CSIRT l'ultimo adempimento formale richiesto dalla normativa NIS2.",
+                    facilitatorAction: "Chiedi al Referente CSIRT l'ultimo adempimento formale richiesto dalla normativa NIS2. **Leggi le 3 opzioni al partecipante.**",
                     logInstruction: "Registra la scadenza (1 Mese) e il documento finale (Relazione Finale) sottomesso al CSIRT.",
-                    targetResponse: "Scadenza: Entro 1 Mese. Documento: Relazione Finale (RC.RP-06) per concludere formalmente l'obbligo di notifica NIS2."
+                    targetResponse: "Scadenza: Entro 1 Mese. Documento: Relazione Finale (RC.RP-06) per concludere formalmente l'obbligo di notifica NIS2.",
+                    mockChoices: [
+                        "Scadenza: Entro 1 Mese. Documento: Relazione Finale (RC.RP-06) per concludere formalmente l'obbligo di notifica NIS2.",
+                        "Scadenza: Entro 6 mesi. Documento: Rapporto annuale di Cyber Security (GV.OV-03).",
+                        "Scadenza: Non definita. Documento: Una nota informale che dichiara il successo dell'Eradication e del Recovery."
+                    ]
                 }
             ]
         }
@@ -160,7 +201,6 @@
     let currentLogData = {}; 
 
     window.onload = function() {
-        // Il pulsante deve essere abilitato all'avvio
         document.getElementById('next-phase-button').disabled = false; 
         document.getElementById('next-phase-button').textContent = "Inizia TTX: FASE 1";
         renderPhase();
@@ -173,8 +213,6 @@
         const scenarioDiv = document.getElementById('ttx-scenario');
         const facilitatorText = document.getElementById('facilitator-text');
         const logEntryDiv = document.getElementById('log-entry');
-        const targetResponseDisplay = document.getElementById('target-response-display');
-        const targetResponseText = document.getElementById('target-response-text');
         const nextButton = document.getElementById('next-phase-button');
 
         // 1. Aggiorna lo Scenario e la Fase
@@ -190,11 +228,25 @@
             <p><strong>Domanda a:</strong> <span style="color:#004d99; font-weight:bold;">${action.role}</span></p>
             <p><strong>Domanda:</strong> ${action.question}</p>
         `;
+        
+        // --- Aggiunge le opzioni di risposta per il Facilitatore ---
+        let choicesHTML = '';
+        if (action.mockChoices && action.mockChoices.length > 0) {
+            // Randomizza l'ordine delle opzioni
+            const randomizedChoices = action.mockChoices.slice().sort(() => Math.random() - 0.5); 
+            
+            choicesHTML = `<div class="mock-choice"><h4>Opzioni da leggere al Partecipante:</h4><ol>`;
+            randomizedChoices.forEach(choice => {
+                const isCorrect = (choice === action.targetResponse);
+                choicesHTML += `<li>${choice} ${isCorrect ? ' (CORRETTA)' : ''}</li>`;
+            });
+            choicesHTML += `</ol><p><strong>Nota: Registra la risposta scelta dal partecipante, indipendentemente dalla correttezza.</strong></p></div>`;
+        }
 
         // 3. Istruzioni per il Log (per guidare la registrazione)
         logEntryDiv.innerHTML = `
             <h3>📝 Registrazione Risposta</h3>
-            <p><strong>AZIONE RICHIESTA:</strong> Chiedi la risposta a <strong>${action.role}</strong>.</p>
+            ${choicesHTML}
             <p><strong>DA REGISTRARE:</strong> ${action.logInstruction}</p>
             <textarea id="facilitator-response-input" rows="3" placeholder="Digita qui la risposta completa del partecipante e l'ora."></textarea>
             
@@ -288,9 +340,7 @@ function processNextAction() {
     const totalPhases = ttxPhases.length;
 
     // Check if the current action is the LAST action of the LAST phase
-    // L'indice dell'azione è 0-based. Se è l'ultima azione (indice = totale - 1), allora avanza.
     if (currentPhaseIndex === totalPhases - 1 && currentActionIndex === totalActionsInCurrentPhase - 1) {
-        // Ultima azione dell'ultima fase completata.
         endTTX();
         return; 
     }
